@@ -142,6 +142,19 @@ export POSTGRES_DB="${DB_NAME}"
 export POSTGRES_PORT="${DB_PORT}"
 EOF
 
+# Apply the Recipe Hub schema and development seed data using the existing
+# container startup/init approach. Both SQL files are written to be idempotent
+# so the startup script can safely re-run without duplicating core data.
+if [ -f "init_recipe_hub.sql" ]; then
+    echo "Applying Recipe Hub schema bootstrap..."
+    sudo -u postgres ${PG_BIN}/psql -p ${DB_PORT} -d ${DB_NAME} -f init_recipe_hub.sql
+fi
+
+if [ -f "seed_recipe_hub.sql" ]; then
+    echo "Applying Recipe Hub seed bootstrap..."
+    sudo -u postgres ${PG_BIN}/psql -p ${DB_PORT} -d ${DB_NAME} -f seed_recipe_hub.sql
+fi
+
 echo "PostgreSQL setup complete!"
 echo "Database: ${DB_NAME}"
 echo "User: ${DB_USER}"
